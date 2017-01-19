@@ -26,11 +26,19 @@ resource "aws_instance" "instance" {
   }
 }
 
+data "aws_ebs_snapshot" "data_volume_snapshot" {
+  most_recent = true
+  filter {
+    name = "tag:Name"
+    values = ["moio-sumaform-package-mirror-data-snapshot"]
+  }
+}
+
 resource "aws_ebs_volume" "data_disk" {
     availability_zone = "${var.availability_zone}"
     size = 500 # GiB
     type = "sc1"
-    snapshot_id = "${var.data_volume_snapshot_id}"
+    snapshot_id = "${replace("null", data.aws_ebs_snapshot.data_volume_snapshot.id)}"
     tags {
       Name = "${var.name_prefix}-package-mirror-data-volume"
     }
