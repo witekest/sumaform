@@ -1,5 +1,6 @@
 include:
   - default
+  - mirror.terraform
 
 mozilla_certificates:
   pkg.installed:
