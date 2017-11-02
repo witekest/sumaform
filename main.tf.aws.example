@@ -109,30 +109,25 @@ module "aws_minion" {
   ami = "ami-febcf8e9" // change if appropriate (non-SUSE employees or non-us-east-1 region)
   instance_type = "t2.nano"
   volume_size = 2 // GiB
-  key_name = // add SSH key name as a string here
-  key_file = // add SSH private key path as a string here
+  key_name = "${local.key_name}"
+  key_file = "${local.key_file}"
   private_subnet_id = "${module.aws_network.private_subnet_id}"
   private_security_group_id = "${module.aws_network.private_security_group_id}"
-  name_prefix = "sumaform"
+  name_prefix = "${local.name_prefix}"
 
-  server = "${module.aws_suma3pg.private_names[0]}"
+  server = "${module.aws_suma31pg.private_names[0]}"
   role = "minion"
   mirror_public_name = "${module.aws_mirror.public_name}"
   mirror_private_name = "${module.aws_mirror.private_name}"
 }
 
-output "key_file" {
-  value = // add SSH private key path as a string here
-}
-
-output "mirror_public_name" {
-  value = "${module.aws_mirror.public_name}"
-}
-
-output "aws_suma3pg_private_name" {
-  value = "${module.aws_suma3pg.private_names[0]}"
-}
-
-output "aws_minion_private_names" {
-  value = ["${module.aws_minion.private_names}"]
+resource "null_resource" "ssh_configuration" {
+  provisioner "local-exec" {
+    command = <<EOF
+./configure_aws_tunnels.rb --key-file ${local.key_file} \
+                           --mirror ${module.aws_mirror.public_name} \
+                           --single-instance suma31pg:${module.aws_suma31pg.private_names[0]}
+                           --multiple-instance minion:${join(",", module.aws_minion.private_names)}
+EOF
+  }
 }
