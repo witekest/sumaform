@@ -4,11 +4,7 @@
 # then applies the highstate
 
 
-if [ -f /etc/debian_version ]; then
 salt-call --local --file-root=/root/salt/ --log-level=debug state.sls default.minimal ||:
-else
-salt-call --local --file-root=/root/salt/ --log-level=quiet --output=quiet state.sls default.minimal ||:
-fi
 salt-call --local --file-root=/root/salt/ --log-level=info --retcode-passthrough --force-color state.highstate || exit 1
 
 chmod +x /root/salt/highstate.sh
