@@ -105,12 +105,21 @@ spacewalk_git_repository:
   cmd.run:
 {%- if grains.get("git_repo") == "default" %}
 {%- if grains.get("branch") == "master" %}
-    - name: git clone --depth 1 https://github.com/uyuni-project/uyuni.git -b master /root/spacewalk
+    - name: |
+        git clone --depth 1 --filter=blob:limit=50K --no-checkout https://github.com/uyuni-project/uyuni.git /root/spacewalk
+        cd /root/spacewalk
+        git checkout master -- testsuite/
 {%- else %}
-    - name: git clone --depth 1 https://github.com/SUSE/spacewalk -b {{ grains.get("branch") }} /root/spacewalk
+    - name: |
+        git clone --depth 1 --filter=blob:limit=50K --no-checkout https://github.com/SUSE/spacewalk /root/spacewalk
+        cd /root/spacewalk
+        git checkout {{ grains.get("branch") }} -- testsuite/
 {%- endif %}
 {%- else %}
-    - name: git clone --depth 1 {{ grains.get("git_repo") }} -b {{ grains.get("branch") }} /root/spacewalk
+    - name: |
+        git clone --depth 1 --filter=blob:limit=50K --no-checkout {{ grains.get("git_repo") }} /root/spacewalk
+        cd /root/spacewalk
+        git checkout {{ grains.get("branch") }} -- testsuite/
 {%- endif %}
     - creates: /root/spacewalk
     - require:
